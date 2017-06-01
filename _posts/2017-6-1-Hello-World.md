@@ -24,16 +24,9 @@ This is [CHORD](https://github.com/larzeitlin/Chord), a circle of fifths based M
 
 ![Anatron Logic scripter controller]({{ site.baseurl }}/images/ana.jpg "logic scripter interface")  
 
-```Python
+```python
 x = 10
 def func(x):
 	return(x*2)
 ```  
 
-```C++
-#include <iostream>
-int main()
-{
-	return 0;
-}
-```  
