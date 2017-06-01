@@ -4,11 +4,10 @@ title: About
 permalink: /about/
 ---
 
-Some information about you!
+This is a github-blog all about how my life got fairly fixated on trying to teach myself about computer science and programming for audio applications. 
 
-### More Information
+I'd like to take a minute, just sit right there and I'll tell you about some fun things I learned in C++, maths, Digital Signal Processing, and other things maybe. 
 
-A place to include any other types of information that you'd like to include about yourself.
 
 ### Contact me
 
