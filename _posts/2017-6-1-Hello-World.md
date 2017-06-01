@@ -23,3 +23,5 @@ This is [CHORD](https://github.com/larzeitlin/Chord), a circle of fifths based M
 [This one](https://github.com/larzeitlin/Anatron-Scripter-Interface) is my first and only foray into logic's scripter tool. It's just a very simple mapping of sliders to CC vals in order to control a hardware filter tool called the Anatron.
 
 ![Anatron Logic scripter controller]({{ site.baseurl }}/images/ana.jpg "logic scripter interface")
+
+<script src="https://npmcdn.com/jupyter-js-widgets@~1.2.0/dist/embed.js"></script><script type="application/vnd.jupyter-embedded-widgets">{}</script>
