@@ -5,7 +5,7 @@ title: This is a github blog...
 
 This is a first post to a) test things in and b) lay out some ideas for this blog. 
 
-Really the perpose of it is to document things I am teaching myself, things that I come across that are interesting and, maybe, help other people who are coming from the same angle to avoid some of the pitfalls that I have stumbled into. 
+Really the purpose of it is to document things I am teaching myself, things that I come across that are interesting and, maybe, help other people who are coming from the same angle to avoid some of the pitfalls that I have stumbled into. 
 
 Here is some pictures of projects I'm working on:
 
@@ -20,6 +20,6 @@ This is [CHORD](https://github.com/larzeitlin/Chord), a circle of fifths based M
 ![LearnSynth]({{ site.baseurl }}/images/learnsynth.jpeg "iPlug synth - LearnSynth")
 
 ## Anatron interface
-This one](https://github.com/larzeitlin/Anatron-Scripter-Interface) is my first and only foray into logic's scripter tool. It's just a very simple mapping of sliders to CC vals in order to control a hardware filter tool called the Anatron.
+[This one](https://github.com/larzeitlin/Anatron-Scripter-Interface) is my first and only foray into logic's scripter tool. It's just a very simple mapping of sliders to CC vals in order to control a hardware filter tool called the Anatron.
 
 ![Anatron Logic scripter controller]({{ site.baseurl }}/images/ana.jpg "logic scripter interface")
