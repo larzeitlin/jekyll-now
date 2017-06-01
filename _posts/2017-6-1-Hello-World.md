@@ -10,7 +10,7 @@ int main()
 {
 	using namespace std;
 	cout << "hello world" << endl;
-	return(0)
+	return(0);
 }
 ```
 
@@ -34,12 +34,6 @@ This is [CHORD](https://github.com/larzeitlin/Chord), a circle of fifths based M
 [This one](https://github.com/larzeitlin/Anatron-Scripter-Interface) is my first and only foray into logic's scripter tool. It's just a very simple mapping of sliders to CC vals in order to control a hardware filter tool called the Anatron.
 
 ![Anatron Logic scripter controller]({{ site.baseurl }}/images/ana.jpg "logic scripter interface")  
-
-```python
-x = 10
-def func(x):
-	return(x*2)
-```  
 
 
 
