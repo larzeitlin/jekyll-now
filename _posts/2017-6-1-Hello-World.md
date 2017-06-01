@@ -9,12 +9,17 @@ Really the perpose of it is to document things I am teaching myself, things that
 
 Here is some pictures of projects I'm working on:
 
+## Chord
+
 This is CHORD, a circle of fifths based MIDI-tool for creating chord progressions and other great stuffs. I use it all the time in my own music. 
 ![CHORD]({{ site.baseurl }}/images/chord.png "chord - MIDI tool in Processing, python")
 
-LearnSynth - a synth project I am slowly putting together using various resources including Martin Finke's iPlug tutorial, Will Pirkle's DSP book and Julius Smith's online DSP resources. 
+## LearnSynth
+
+A synth project I am slowly putting together using various resources including Martin Finke's iPlug tutorial, Will Pirkle's DSP book and Julius Smith's online DSP resources. 
 ![LearnSynth]({{ site.baseurl }}/images/learnsynth.jpeg "iPlug synth - LearnSynth")
 
-Anatron interface. My first and only foray into logic's scripter tool. It's just a very simple mapping of sliders to CC vals in order to control a hardware filter tool called the Anatron.
+## Anatron interface
+My first and only foray into logic's scripter tool. It's just a very simple mapping of sliders to CC vals in order to control a hardware filter tool called the Anatron.
 
 ![Anatron Logic scripter controller]({{ site.baseurl }}/images/ana.jpg "logic scripter interface")
