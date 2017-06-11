@@ -10,10 +10,9 @@ I'd like to take a minute, just sit right there and I'll tell you about some fun
 
 I'm interested in freelance work and other opportunities.
 
-[Here's my CV]({{ site.baseurl }}/LukeZeitlinCV-2.pdf)  
-[...n' here's my github](https://github.com/larzeitlin)
+Here's my [CV]({{ site.baseurl }}/LukeZeitlinCV-2.pdf)  
+And this is my [github](https://github.com/larzeitlin)
 
 
 ### Contact me
-
 [larzeitlin@gmail.com](mailto:larzeitlin@gmail.com)
