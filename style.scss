@@ -108,8 +108,6 @@ strong, b {
 
 img {
   max-width: 100%;
-  margin-left: auto;
-  margin-right: auto
 }
 
 // Fixes images in popup boxes from Google Translate
@@ -286,6 +284,12 @@ footer {
   padding: 20px 0;
   text-align: center;
 }
+
+/* To center images */
+.center {
+    text-align: center;
+}
+
 
 // Settled on moving the import of syntax highlighting to the bottom of the CSS
 // ... Otherwise it really bloats up the top of the CSS file and makes it difficult to find the start
