@@ -1,11 +1,12 @@
 
 .highlight {
   background-color:#000000;
-  padding: 7px 7px 7px 1-px;
-  border: 1px solid #000000;
+  padding: 7px 7px 7px 10px;
+  border: 5px solid #000000;
   margin: 20px 0 20px 0;
   overflow: scroll;
   font-size: 14px
+  font-weight: lighter
 }
 
 code {
@@ -30,8 +31,8 @@ code {
 .highlight .gr { color: #DC322F } /* Generic.Error */
 .highlight .gh { color: #CB4B16 } /* Generic.Heading */
 .highlight .gi { color: #859900 } /* Generic.Inserted */
-.highlight .go { color: #93A1A1 } /* Generic.Output */
-.highlight .gp { color: #93A1A1 } /* Generic.Prompt */
+.highlight .go { color: #859900 } /* Generic.Output */
+.highlight .gp { color: #859900 } /* Generic.Prompt */
 .highlight .gs { color: #93A1A1; font-weight: bold } /* Generic.Strong */
 .highlight .gu { color: #CB4B16 } /* Generic.Subheading */
 .highlight .gt { color: #93A1A1 } /* Generic.Traceback */
