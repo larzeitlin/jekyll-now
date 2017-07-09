@@ -10,7 +10,7 @@ Wait wot! All this stuff for free? If you are feeling all warm and fuzzy then ma
 
 This is a repitch delay plugin with a bunch of features including a 2 mode filter, Ping-Pong setting, tempo and ms delay settings. It's a 64bit Audio Unit.
 
-![MINDTHEGAP]({{ site.baseurl }}/images/mtgsc.jpeg "Mind The Gap AU")
+![MINDTHEGAP]({{ site.baseurl }}/images/mtgsc.jpeg "Mind The Gap AU"){: .center }
 
 - Supported for Mac OSX 10.10 or higher. 
 - The current version of is downloadable [here](https://www.dropbox.com/s/zzjtsqrw6fw69qa/MindTheGap.dmg?dl=0) 
@@ -46,7 +46,7 @@ further information about the Anatron can be found [here](http://icrowdnewswire.
 
 This is a desktop application I made in Objective-C for performing a bunch of music-maths calculations quickly. It's pretty handy for when you just want to do some quick conversions without having to think too much. 
 
-![Music Calc]({{ site.baseurl }}/images/MC.tiff "Music Calculator")  
+![Music Calc]({{ site.baseurl }}/images/MC.tiff "Music Calculator"){: .center }  
 
 - Supported for Mac OSX 10.10 or higher. 
 - The current version is downloadable [here](https://github.com/larzeitlin/Music-Calculator/releases)
