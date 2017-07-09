@@ -13,7 +13,7 @@ This is a repitch delay plugin with a bunch of features including a 2 mode filte
 ![MINDTHEGAP]({{ site.baseurl }}/images/mtgsc.jpeg "Mind The Gap AU")
 
 - Supported for Mac OSX 10.10 or higher. 
-- The current version of is downloadable 
+- The current version of is downloadable [here](https://www.dropbox.com/s/zzjtsqrw6fw69qa/MindTheGap.dmg?dl=0) 
 
 
 
