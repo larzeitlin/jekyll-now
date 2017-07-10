@@ -13,7 +13,7 @@ This is a repitch delay plugin with a bunch of features including a 2 mode filte
 ![MINDTHEGAP]({{ site.baseurl }}/images/mtgsc.jpeg "Mind The Gap AU"){: .center }
 
 - Supported for Mac OSX 10.10 or higher. 
-- The current version of is downloadable [here](https://www.dropbox.com/s/zzjtsqrw6fw69qa/MindTheGap.dmg?dl=0) 
+- The current version of is downloadable [here](https://www.dropbox.com/s/zzjtsqrw6fw69qa/MindTheGap.dmg?dl=1) 
 
 
 
@@ -26,7 +26,7 @@ This is CHORD, a free circle of fifths based MIDI-tool for creating chord progre
 
 
 - Supported for Mac OSX 10.10 or higher. 
-- The current version of CHORD is downloadable [here](https://www.dropbox.com/s/9zfj8dkrkkgvd0k/Chord.dmg?dl=0)
+- The current version of CHORD is downloadable [here](https://www.dropbox.com/s/9zfj8dkrkkgvd0k/Chord.dmg?dl=1)
 
 
 ## Anatron interface
