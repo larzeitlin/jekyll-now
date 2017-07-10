@@ -46,7 +46,7 @@ further information about the Anatron can be found [here](http://icrowdnewswire.
 
 This is a desktop application I made in Objective-C for performing a bunch of music-maths calculations quickly. It's pretty handy for when you just want to do some quick conversions without having to think too much. 
 
-![Music Calc]({{ site.baseurl }}/images/MC.tiff "Music Calculator"){: .center }  
+![Music Calc]({{ site.baseurl }}/images/calc.jpeg "Music Calculator"){: .center }  
 
 - Supported for Mac OSX 10.10 or higher. 
 - The current version is downloadable [here](https://github.com/larzeitlin/Music-Calculator/releases)
