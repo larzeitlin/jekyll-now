@@ -7,7 +7,7 @@ permalink: /music/
 Here's a list of links to my EPs and compilation projects:
 
 
-### Atman Construct EPs: 
+### Atman Construct EPs 
 
 
 - [Elysian Terraform (2012)](http://www.ektoplazm.com/free-music/atman-construct-elysian-terraform)
