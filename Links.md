@@ -25,9 +25,7 @@ One of the things I love about audio programming (and its related topics) is the
 
 - [MIT OpenCourseware - Linear Algebra](https://ocw.mit.edu/courses/mathematics/18-06-linear-algebra-spring-2010/video-lectures/) : Taught by Gilbert Strang. Fantastic course. 
 
-### Programming
-
-This is in no way a comprehensive list of programming websites I like. Just a few choice links. 
+### Programmin
 
 - [LearnCpp](http://www.learncpp.com) : Very clear, elegant explinations of c++ concepts. 
 
