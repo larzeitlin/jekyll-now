@@ -4,7 +4,7 @@ title: Links
 permalink: /links/
 ---
 
-Here's a collection of useful links. One of the things I love about digital signal processing and related topics is the amount of materials online to teach yourself from. My favourite are below, along with some other helpful resources:
+One of the things I love about audio programming (and its related topics) is the amount of free materials online to teach yourself from. Here's a few of my choice websites. A lot of them are personal projects, just like this website - so I guess they've been the inspiration to start putting this page together myself. 
 
 
 ### DSP
