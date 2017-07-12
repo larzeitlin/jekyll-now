@@ -16,9 +16,9 @@ permalink: /links/
 
 ### Maths
 
-- [Coursera - Calculus](https://www.coursera.org/learn/calculus1) : By Jim Fowler from Ohio State University. This is probably the best taught course I've ever studied (on or offline). 
+- [Coursera - Calculus](https://www.coursera.org/learn/calculus1) : By Jim Fowler from Ohio State University. Really fantastic teaching. Can't reccomended this enough. 
 
-- [Better Explained](https://betterexplained.com) : Khalid has made a really great resource for tricky maths topics with this website. Caveat: I can't recommend  his Fourier Transform materials. They are a little confused in my humble opinion. 
+- [Better Explained](https://betterexplained.com) : Khalid has made a really great resource for tricky maths topics with this website. Caveat: I can't recommend  his Fourier Transform materials, they are a little confused IMHO. 
 
 - [MIT OpenCourseware - Linear Algebra](https://ocw.mit.edu/courses/mathematics/18-06-linear-algebra-spring-2010/video-lectures/) : Taught by Gilbert Strang. Fantastic course. 
 
@@ -28,16 +28,14 @@ permalink: /links/
 
 - [WDL Forum](https://forum.cockos.com/forumdisplay.php?f=32) : In the absence of a proper API for iPlug, trawling this forum is the best resource for learning about it.
 
-- [Florian Le Bourdais](http://flothesof.github.io) : Blog posts on interesting subjects, mostly with Python. I don't think DSP is his main thing but he writes on a range of topics well. 
+- [Florian Le Bourdais](http://flothesof.github.io) : Blog posts on interesting subjects, mostly with Python. He writes on a range of topics well. 
 
-- [Martin Finke](http://www.martin-finke.de/blog/) : The most comprehensive beginner tutorial in iPlug that I've seen. 
+- [Martin Finke](http://www.martin-finke.de/blog/) : The most comprehensive beginner tutorial in iPlug out there. 
 
 ### Mastering Services
-
-The marketplace of audio mastering is a mine-field of sham professionals. I've used many and been disappointed with most. Here are some trusted mastering services:
 
 - [Really Good Mastering](https://www.recreationstudio.co.uk/sectors/really-good-mastering/) : Adam is my go-to-guy for mastering. Affordable, good quality, very intuitive. 
 
 - [OOOD Mastering](http://oood.net/mastering/about-stooodio-mastering) : Colin is a consummate professional. Very reliable quality results. 
 
-- [Hermetech Mastering](http://hermetechmastering.com) : Greg has done great work on my tracks. I highly recommend him. 
+- [Hermetech Mastering](http://hermetechmastering.com) : Greg has done great work on my tracks. Highly reccomended.  
