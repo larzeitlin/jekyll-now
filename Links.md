@@ -35,6 +35,8 @@ This is in no way a comprehensive list of programming websites I like. Just a fe
 
 - [Florian Le Bourdais](http://flothesof.github.io) : Blog posts on interesting subjects, mostly with Python. I don't think DSP is his main thing but he writes on a range of topics well. 
 
+- [Martin Finke](http://www.martin-finke.de/blog/) : The most comprehensive beginner tutorial in iPlug that I've seen. 
+
 ### Mastering Services
 
 The marketplace of audio mastering is a mine-field of sham professionals. I've used many and been disappointed with most. Here are some trusted mastering services:

@@ -7,7 +7,7 @@ permalink: /music/
 Here's a list of links to my EPs and compilation projects:
 
 
-## Atman Construct EPs: 
+### Atman Construct EPs: 
 
 
 - [Elysian Terraform (2012)](http://www.ektoplazm.com/free-music/atman-construct-elysian-terraform)
@@ -20,7 +20,7 @@ Here's a list of links to my EPs and compilation projects:
 
 - [Divided by Time (2016)](https://aquaticcollective.bandcamp.com/album/divided-by-time)
 
-## Into This Wired Abyss Compilations
+### Into This Wired Abyss Compilations
 
 This was a compilation series I put together through 2012 - 2015. 
 It was a great pleasure to work with so many fantastic artists.
