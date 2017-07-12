@@ -10,9 +10,9 @@ permalink: /links/
 
 - [Coursera - Audio Signal Processing](https://www.coursera.org/learn/audio-signal-processing) : A great, free online course on DSP. Mostly spectral stuff. 
 
-- [Laurent de Soras](http://ldesoras.free.fr/prod.html) : A blog with a bunch of interesting papers on DSP stuff. 
+- [Laurent de Soras](http://ldesoras.free.fr/prod.html) : A blog with a bunch of interesting papers on DSP topics. 
 
-- [Katja](http://www.katjaas.nl/home/home.html) : Slightly eccentric website. Great explanations of a bunch of maths and DSP related stuff with good illustrations. 
+- [Katja](http://www.katjaas.nl/home/home.html) : Slightly eccentric website. Great explanations of a bunch of maths and DSP related topics with good illustrations. 
 
 ### Maths
 
