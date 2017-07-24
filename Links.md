@@ -18,7 +18,7 @@ permalink: /links/
 
 - [Coursera - Calculus](https://www.coursera.org/learn/calculus1) : By Jim Fowler from Ohio State University. Really fantastic teaching. Can't reccomended this enough. 
 
-- [Better Explained](https://betterexplained.com) : Khalid has made a really great resource for tricky maths topics with this website. Caveat: I can't recommend  his Fourier Transform materials, they are a little confused IMHO. 
+- [Better Explained](https://betterexplained.com) : Khalid has made a really great resource for tricky maths topics with this website.
 
 - [MIT OpenCourseware - Linear Algebra](https://ocw.mit.edu/courses/mathematics/18-06-linear-algebra-spring-2010/video-lectures/) : Taught by Gilbert Strang. Fantastic course. 
 
