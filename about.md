@@ -16,5 +16,3 @@ Here's my [CV]({{ site.baseurl }}/images/LukeZeitlinCV(Jul17).pdf)
 And this is my [github](https://github.com/larzeitlin)
 
 
-<img src="/images/banner.png">{: .center }
-
