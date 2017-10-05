@@ -28,6 +28,7 @@ body {
   max-width: 740px;
   padding: 0 10px;
   width: 100%;
+
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -45,18 +46,25 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 h1 {
-  font-size: 30px;
+  font-size: 40px;
+  font-family: $helveticaNeue;
+  font-weight: 200;
   a {
-    color: inherit;
+
+    color: $black;
   }
 }
 
 h2 {
   font-size: 24px;
+  font-family: $helveticaNeue;
+  font-weight: 300;
 }
 
 h3 {
   font-size: 20px;
+  font-family: $helveticaNeue;
+  font-weight: 300;
 }
 
 h4 {
