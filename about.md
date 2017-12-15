@@ -12,7 +12,7 @@ I'd like to take a minute, just sit right there and I'll tell you some fun stuff
 
 I'm interested in freelance work and other opportunities.
 
-Here's my [CV]({{ site.baseurl }}/images/LukeZeitlinCV(Jul17).pdf)  
+Here's my [CV]({{ site.baseurl }}/images/CVDec17.pdf)  
 And this is my [github](https://github.com/larzeitlin)
 
 
