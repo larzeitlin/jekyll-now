@@ -5,14 +5,11 @@ permalink: /about/
 ---
 
 
+Topics I'm into are data engineering, signal processing, music, generative art and machine learning.
 
-This is a github-blog all about how my life got fairly fixated on learning about computer science and programming for audio applications. 
+This is just a space for my writings, to publish software for people to mess around with, and to provide some context / resources for people on the same path.
 
-I'd like to take a minute, just sit right there and I'll tell you some fun stuff about C++, Python, maths, music, DSP and more.  
 
-I'm interested in freelance work and other opportunities.
-
-Here's my [CV]({{ site.baseurl }}/images/CVDec17a.pdf)  
-And this is my [github](https://github.com/larzeitlin)
+This is my [github](https://github.com/larzeitlin)
 
 
