@@ -5,7 +5,7 @@ permalink: /about/
 ---
 
 
-Topics I'm into are data engineering, signal processing, music, generative art and machine learning.
+Topics I'm into include data engineering, signal processing, music, generative art and machine learning.
 
 This is just a space for my writings, to publish software for people to mess around with, and to provide some context / resources for people on the same path.
 
