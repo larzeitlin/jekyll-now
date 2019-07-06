@@ -1,0 +1,133 @@
+<p>Low-pass filters are some of the most fundamental tools for audio processing. You don’t need to understand loads of maths to have a feel for how they work.</p>
+
+<p>A LPF attenuates some of the higher frequencies in a signal while allowing the lower ones to ‘pass’ through. There is more than one way to do this, however the easiest and most common way is to use <strong>destructive interference.</strong></p>
+
+<p>Destructive interference happens when you add a positive number to a negative number. If they are of equal magnitude then the result is 0. If they are not then the result will be somewhere in between the two values.</p>
+
+<p>Digital signals are just a series of numbers (conventionally between -1 and 1), so if you add together two signals of the same length, each ‘sample’ will be added to its counterpart in the other signal. If one signal is positive at the same time as the other is negative, they can cancel each other out.</p>
+
+<p>We can see this by plotting two sinusoids in Python with MatPlotLib. A is a cosine wave with 0 phase, it’s the blue one. B, the green one, is the same cosine wave but with a phase of pi (so half a period out of phase with A). Then we plot the sum of the two in red.</p>
+
+<p><strong>note: This uses a sin generating function, genSine (link at the end of the post). The details of this aren’t important here other than understanding that it computes a sinusoid. The parameters it takes are: (amplitude, freq in Hz, phase in radians, sampling freq, duration in seconds).</strong></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
+
+<span class="n">A</span> <span class="o">=</span> <span class="n">genSine</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1000.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">)</span>
+<span class="n">B</span> <span class="o">=</span> <span class="n">genSine</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mf">1000.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">)</span>
+<span class="nb">sum</span> <span class="o">=</span> <span class="n">A</span> <span class="o">+</span> <span class="n">B</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">B</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="nb">sum</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><img src="/images/1.0.png" alt="Diagram" title="sins - pi phase" class="center" /></p>
+
+<p>So that’s great, if we want to make something silent we can just invert it and add it to itself. This has all sorts of uses in itself (for example, to test if two sounds are identical or not), but how does this help us pull down higher frequencies more than lower ones? Before we answer that let’s look at the opposite of destructive interference: <strong>constructive interference.</strong></p>
+
+<p>Constructive interference happens when you add together signals that have similarities to each other, just as destructive interference happened where there were differences. For example, if we add together two identical sinusoids the result will be a sinusoid of the same frequency but twice the amplitude.</p>
+
+<p>Here A and B are in green (overlapping), and sum is in red:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">A</span> <span class="o">=</span> <span class="n">genSine</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1000.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">)</span>
+<span class="n">B</span> <span class="o">=</span> <span class="n">genSine</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1000.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">)</span>
+<span class="nb">sum</span> <span class="o">=</span> <span class="n">A</span> <span class="o">+</span> <span class="n">B</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">B</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">Sum</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><img src="/images/1.1.png" alt="Diagram" title="sins - in phase" class="center" /></p>
+
+<p>So that’s quite intuitive  - one noise plus another identical noise is a louder noise.</p>
+
+<p>Maybe you are wondering what happens when the two are not ether exactly in phase or out of phase. Here are some other sinusoids with different phase relationships, and their sums (in red):  </p>
+
+<h4 id="05pi">0.5*pi:</h4>
+
+<p><img src="/images/1.2.png" alt="Diagram" title="sins - 0.5 * pi phase" class="center" /></p>
+
+<h4 id="025pi">0.25*pi</h4>
+
+<p><img src="/images/1.3.png" alt="Diagram" title="sins - 0.25 * pi phase" class="center" /></p>
+
+<h4 id="09pi">0.9*pi</h4>
+
+<p><img src="/images/1.4.png" alt="Diagram" title="sins - 0.9 * pi phase" class="center" /></p>
+
+<p>These different phase relationships reveal a trend:</p>
+
+<p><strong>The more similar two signals are at a given point in time, the more constructive interference they have with each other, the more different they are at a given point in time, the more destructive interference.</strong></p>
+
+<p>We can exploit this quality to filter out “different” sounds and retain “similar” ones. All we need to do is find a signal to add to our input that has the right similarities and differences - one that is pretty similar at the low end but opposite-lookin’ at the high end.  Let’s see how…</p>
+
+<p> </p>
+<h3 id="one-zero-lpf">One-Zero LPF</h3>
+
+<p>The One-Zero filter in the block diagram below is a super-simple low pass filter. It works by forking the signal into two, delaying one of the forks by one sample and then adding them back together.</p>
+
+<p>The name has nothing to do with binary, or with what values it outputs by the way, it’s to do with how you would map its response in the z-plane, which is much beyond the scope of this article.</p>
+
+<p><img src="/images/1.5.jpeg" alt="Signal flow" title="LFP block diagram" class="center" /></p>
+
+<p>Now, imagine that x in the diagram above is the signal of a cosine wave with a frequency of half of the sampling frequency. This is known as the Nyquist frequency -  the highest possible frequency that can be represented for a given sampling frequency. Imagine we are only working with 18 samples in our signal.</p>
+
+<p>Assuming its amplitude is 1, the x values are going to jump right from 1 to -1 to 1 to -1. You can see that this is the fastest oscilation we can represent here (and therefor the highest frequency). If you delay it by one sample you get the opposite sequence, as we can see:</p>
+
+<p><img src="/images/1.6.jpeg" alt="Table sins" title="table sins" class="center" /></p>
+
+<p><strong>Note: for column 0 we have no delayed value - we’ll just set the sum value of this one to 0 to avoid problems in the upcoming example.</strong></p>
+
+<p>So, for the highest frequency we can talk about for a given sampling frequency, the output is 0. This cancels out just like the first plot we did. This is because one sample of delay will cause Nyquist to be exactly pi phase.</p>
+
+<p>However, for lower frequencies, one sample of delay isn’t such a big difference. In fact there is going to be a whole load of constructive interference at low frequencies - this boost to low frequencies is one reason why this “One-Zero” filter is not ideal for many situations.</p>
+
+<p>Let’s implement a simple One-Zero LPF in Python, throw some different sinusoids through it and graph what comes out:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">lpf</span><span class="p">(</span><span class="nb">input</span><span class="p">):</span>
+	<span class="n">mem</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+	<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">input</span><span class="p">)):</span>
+		<span class="n">temp</span> <span class="o">=</span> <span class="n">mem</span> <span class="o">+</span> <span class="nb">input</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+		<span class="n">mem</span> <span class="o">=</span> <span class="nb">input</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+		<span class="nb">input</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">temp</span>
+	<span class="nb">input</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>	
+	<span class="k">return</span> <span class="nb">input</span>
+</code></pre></div></div>
+
+<p>So first we make a little function that holds a sample in mem, then in iterates along the list and replaces each item with the sum of mem and the value at that point. A temporary value is set up so that we can do the sum and replace mem in the same pass.</p>
+
+<p>Now let’s make a test function for it.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">testSines</span><span class="p">(</span><span class="n">length</span><span class="p">):</span>
+    
+    <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">while</span><span class="p">(</span><span class="n">f</span> <span class="o">&lt;</span> <span class="n">length</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">):</span>
+        <span class="n">sin</span> <span class="o">=</span> <span class="n">genSine</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+        <span class="n">filteredSin</span> <span class="o">=</span> <span class="n">lpf</span><span class="p">(</span><span class="n">sin</span><span class="p">)</span>
+        <span class="n">amp</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">filteredSin</span><span class="p">)</span>
+        <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">amp</span><span class="p">)</span>
+        <span class="n">f</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">'Hz'</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">'Amplitude'</span><span class="p">)</span>
+        
+<span class="n">testSines</span><span class="p">(</span><span class="mi">101</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>This makes a range of sinusoids with our genSine function. They vary by their f value (frequency) which ranges from 1hz to the length divided by two (Nyquist). These are then put into the results list and plotted. The amplitude here can be found by taking the maximum value in the signal. Notice how the chosen length for the test was 101 - a prime number. I encourage you to run this code yourself with different lengths in order to figure out the significance of that.</p>
+
+<p><img src="/images/1.7.png" alt="Test result" title="frequency responce" class="center" /></p>
+
+<p>We can see that the high frequencies are attenuated and the low frequencies are boosted. This low boost is one of several reasons that make this filter limitied in its applications.</p>
+
+<p>We’ve made a few assumptions here. For example the assumption that this works with signals that are not just sinusoids. In later posts I’ll write about why we can assume this - <a href="https://en.wikipedia.org/wiki/Fourier_transform">Fourier</a> demonstrated that all signals can be made by summing together sinusoids. We’ve also said nothing about what happens at the “in between frequencies”. We’ll get onto some of these things in future posts.</p>
+
+<p><img src="https://upload.wikimedia.org/wikipedia/commons/7/72/Fourier_transform_time_and_frequency_domains_%28small%29.gif" alt="Fourier" title="fourier series" class="center" /></p>
+
+<p>Lucas V. Barbosa’s animation of the fourier series of a function. taken from Wikipedia.</p>
+
+<p>There is a lot more to discuss with LPFs, but from this point on it gets more mathsy. However, the basic notion is still the same: a feed-forward delay line summed with a non delayed line. To go deeper read some of the <a href="https://ccrma.stanford.edu/~jos/filters/Simplest_Lowpass_Filter.html">fantastic materials</a> by Julius Smith from Stanford University.</p>
+
+<p><a href="/genSine.py">genSine</a></p>
+

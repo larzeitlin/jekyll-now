@@ -1,0 +1,410 @@
+<p>A delay effect is often thought of as an “echoing” sound. However digital delay lines are also used to make other effects such as comb filters. The main concept that these effects rely on is feedback.</p>
+
+<p>Feedback is, intuitively, just taking the output of a process and adding the output to any new input back at the beginning. However, if we take all of the output and keep adding it to all of the input then we are in danger of the filter “blowing-up” - ie. getting rapidly and uncontrollably louder. You may have experienced this if you’ve ever held a microphone close to a speaker which is outputting the sound of the mic. This ability to make an everlasting loop illustrates why feedback filters are called “Infinite Impulse Response” (IIR) filters.</p>
+
+<p>To control this feedback we can multiply the returning output by a scale factor ( &lt;= 1). This insures we don’t get a full scale version of the output going back into the input. We’ll call this scale factor “fb level”.</p>
+
+<p><img src="/images/2.1.jpeg" alt="Delay Diagram" class="center" />
+￼</p>
+
+<p>So the diagram above is simple enough, but it doesn’t actually tell us anything about how to cause the delay to happen. It’s just a “black box”. So, how can we implement it? First let’s look at how you might do it with one sample of delay. To do this we’ll first introduce a bit of terminology that you may know already: </p>
+
+<ul>
+  <li>
+    <p>We’ll call our input signal x and out output signal y.</p>
+  </li>
+  <li>
+    <p>To talk about a specific sample in ether we will just identify the specific sample in brackets, for example x(10), or y(3).</p>
+  </li>
+  <li>
+    <p>For a general sample in the signal we will use n. Samples relative to this can be referred to in relation to n, for example x(n-1) would be the input from one sample in the past, y(n+4) is the output from 4 samples in the future.</p>
+  </li>
+</ul>
+
+<h2 id="single-sample-delay-feedback">single sample delay feedback</h2>
+
+<p>Right, so lets get back to the single sample delay. We can make this by just holding the previous output sample y(n-1) as a variable. Each cycle we’ll take that saved output from last time, perform calculations with it, and then save the new output for the next cycle to play with. Below is a diagram of the process by which this works.</p>
+
+<p><img src="/images/2.2.jpeg" alt="Delay Diagram" class="center" /></p>
+
+<p>This system works fine for one sample of delay. But what if we want longer delays? While it is conceivable to set up more storage variables (storeYn_2, storeYn_3, storeYn_4, etc) and then shuffle the values through this chain of storage every cycle, this would quickly become messy and computationally expensive.</p>
+
+<h2 id="circular-buffers">Circular Buffers</h2>
+
+<p>The standard solution is to introduce another buffer to the system. This buffer operates in a special way, and is known as a circular buffer. As the name suggests, this buffer loops round - when the pointer that accesses it gets to the end it just loops back to the beginning. The value of this may not be immediately clear, but will become so as we go.</p>
+
+<p>Imagine this circular replacing the storeYn_1 variable in the diagram above. Now rather than having to use the y(n-1) value, the y(n) from previous cycle, we can choose the output of any previous cycle: y(n - D). The only limit is the size of our buffer. The animation below shows the circular buffer working with a delay of 3 samples:</p>
+
+<p><img src="/images/2.3.gif" alt="CBuffer" /> </p>
+
+<p>And that, theoretically, is pretty much it! One other thing to be aware of is that you’ll want to provide a wet/dry control for the delay. This is so you can hear some of the original sound alongside the delay (as you would in reality).</p>
+
+<p><img src="/images/2.4.jpeg" alt="Delay Diagram" /> </p>
+
+<h2 id="making-a-basic-delay-effect-in-iplug">Making a basic delay effect in iPlug</h2>
+
+<p>Right, lets try throwing this together in iPlug so we can export it as a Audio Unit (or VST, etc).  
+You’ll need to clone a branch of the WDL framework for iPlug if you haven’t already. WDL-OL is probably the most popular one, maintained by <a href="https://github.com/olilarkin/wdl-ol">Oli Larkin </a>. I’m using <a href="https://github.com/Youlean/IPlug-Youlean">Youlean’s branch</a>  at the moment because of it’s support for a nice graphics library called Cairo. Ether will do fine.</p>
+
+<p>I’m not going to spend ages here explaining how to set-up iPlug with your IDE of choice, there are other guides that would explain it better. Martin <a href="http://www.martin-finke.de/blog/tags/making_audio_plugins.html">Finke’s blog</a> is helpful for this. If you want to build this as a VST then you will need to install the VST SDK from Steinberg. Again, Martin’s great tutorial has easy-to-follow explanations for all of this.</p>
+
+<p>We’ll start be duplicating the IPlugEffect example in the IPlugExamples folder. This can be done with the duplicate.py script in the same folder. Launch a terminal window, navigate to the IPlugExamples folder and run the following command:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">./</span><span class="n">duplicate</span><span class="o">.</span><span class="n">py</span> <span class="n">IPlugEffect</span><span class="o">/</span> <span class="n">DelayPlugin</span> <span class="n">YourName</span>
+</code></pre></div></div>
+
+<p>After duplicating the IPlugEffect the script will tell you to change the PLUG_UID and MFR_IUD.  Open the duplicate project and, in the resource.h file change those to something - whatever you like (4 character codes): </p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">… </span>
+<span class="c1">// http://service.steinberg.de/databases/plugin.nsf/plugIn?openForm</span>
+<span class="c1">// 4 chars, single quotes. At least one capital letter</span>
+<span class="cp">#define PLUG_UNIQUE_ID ‘DDLP’
+</span><span class="c1">// make sure this is not the same as BUNDLE_MFR</span>
+<span class="cp">#define PLUG_MFR_ID ‘LUZE’
+</span><span class="err">…</span>
+</code></pre></div></div>
+
+<p>Before moving forward just check that this example builds. If you build the APP scheme it should launch a window that shows this plugin, which is a basic gain plugin with a bit of text and a knob on the GUI.</p>
+
+<p>Now let’s have a quick look at the layout of this plugin. Look in DelayPlugin.h.</p>
+
+<p>In the public section we’ve got a constructor and destructor as well as a few method declarations: Reset, OnParamChange and ProcessDoubleReplacing. Then in the private section the example has a gain parameter mGain. We’ll look at how this parameter is set up and use it as an example going forward. So leave it there for now.</p>
+
+<h2 id="variables">Variables</h2>
+
+<p>Lets add some of the variables that we are going to use. Underneath mGain lets add mDelaySam (delay in samples), mFeedback and mWet. We’re prefixing these with m to clarify that they are the member variables of the class.  This distinction will be useful because they will have counterparts in the GUI section.</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">…</span>
+<span class="k">class</span> <span class="nc">DelayPlugin</span> <span class="o">:</span> <span class="k">public</span> <span class="n">IPlug</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+  <span class="n">DelayPlugin</span><span class="p">(</span><span class="n">IPlugInstanceInfo</span> <span class="n">instanceInfo</span><span class="p">);</span>
+  <span class="o">~</span><span class="n">DelayPlugin</span><span class="p">();</span>
+
+  <span class="kt">void</span> <span class="n">Reset</span><span class="p">();</span>
+  <span class="kt">void</span> <span class="n">OnParamChange</span><span class="p">(</span><span class="kt">int</span> <span class="n">paramIdx</span><span class="p">);</span>
+  <span class="kt">void</span> <span class="n">ProcessDoubleReplacing</span><span class="p">(</span><span class="kt">double</span><span class="o">**</span> <span class="n">inputs</span><span class="p">,</span> <span class="kt">double</span><span class="o">**</span> <span class="n">outputs</span><span class="p">,</span> <span class="kt">int</span> <span class="n">nFrames</span><span class="p">);</span>
+  
+  
+<span class="k">private</span><span class="o">:</span>
+  <span class="kt">double</span> <span class="n">mGain</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">;</span>
+  <span class="kt">double</span> <span class="n">mDelaySam</span><span class="p">;</span>
+  <span class="kt">double</span> <span class="n">mFeedback</span><span class="p">;</span>
+  <span class="kt">double</span> <span class="n">mWet</span><span class="p">;</span>
+ 
+<span class="p">};</span>
+
+<span class="err">…</span>
+</code></pre></div></div>
+
+<h2 id="user-interface">User Interface</h2>
+
+<p>Ok great, lets jump over to the DelayPlugin.cpp file. Now, in your mind separate those member variables we just declared from the parameters we are about to add to the GUI. At the top of the file there is an enum called EParams. Here we’ll declare the parameters that will be controled in the UI. Lets add ones for delay in milliseconds (note: not samples), feedback percentage, and wet level percentage.The last one, KNumParams, isn’t a real parameter. It’s just there as a tool to return the number of parameters in the enum (which is zero indexed so the maths works out there)</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">…</span>
+<span class="k">enum</span> <span class="n">EParams</span>
+<span class="p">{</span>
+  <span class="n">kGain</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+  <span class="n">kDelayMS</span><span class="p">,</span>
+  <span class="n">kFeedbackPC</span><span class="p">,</span>
+  <span class="n">kWetPC</span><span class="p">,</span>
+  <span class="n">kNumParams</span>
+<span class="p">};</span>
+<span class="err">…</span>
+</code></pre></div></div>
+
+<p>Now beneath that we’ll get these params into the plugin constructor, in just the same way that the Gain example already has. Don’t worry about the SetShape method call. That’s to do with the response mapping of the control. Let’s add our new params:</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">…</span>
+  <span class="n">TRACE</span><span class="p">;</span>
+
+  <span class="c1">//arguments are: name, defaultVal, minVal, maxVal, step, label</span>
+  <span class="n">GetParam</span><span class="p">(</span><span class="n">kGain</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">InitDouble</span><span class="p">(</span><span class="s">"Gain"</span><span class="p">,</span> <span class="mf">50.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">100.0</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">,</span> <span class="s">"%"</span><span class="p">);</span>
+  <span class="n">GetParam</span><span class="p">(</span><span class="n">kGain</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">SetShape</span><span class="p">(</span><span class="mf">2.</span><span class="p">);</span>
+  
+  <span class="n">GetParam</span><span class="p">(</span><span class="n">kDelayMS</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">InitDouble</span><span class="p">(</span><span class="s">"Delay"</span><span class="p">,</span> <span class="mf">10.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">200.</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">,</span> <span class="s">"Milliseconds"</span><span class="p">);</span>
+  <span class="n">GetParam</span><span class="p">(</span><span class="n">kFeedbackPC</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">InitDouble</span><span class="p">(</span><span class="s">"Feedback"</span><span class="p">,</span> <span class="mf">50.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">100.0</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">,</span> <span class="s">"%"</span><span class="p">);</span>
+  <span class="n">GetParam</span><span class="p">(</span><span class="n">kWetPC</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">InitDouble</span><span class="p">(</span><span class="s">"Wet/Dry"</span><span class="p">,</span> <span class="mf">50.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">100.0</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">,</span> <span class="s">"%"</span><span class="p">);</span>
+  <span class="err">…</span>
+</code></pre></div></div>
+
+<p>Beneath this you can see the GUI is initiated and a background colour is attached. Then the AttachControl method is called on pGraphics. This is to add a new knob on the interface (you can see the image file for it in the resources folder - it’s the default iPlug knob). Let’s use the same knob for our parameters. You’ll see that these use the ELayout enum above to specify x and y coordinates for the knobs. This is a nice, tidy practice that but for this example we’ll just throw in raw coordinates so we get the idea of what is going where. We can also chuck the IColor and Itext lines because we don’t need no text!</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">…</span>
+  <span class="n">pGraphics</span><span class="o">-&gt;</span><span class="n">AttachPanelBackground</span><span class="p">(</span><span class="o">&amp;</span><span class="n">COLOR_GRAY</span><span class="p">);</span>
+  
+  <span class="n">IBitmap</span><span class="o">*</span> <span class="n">knob</span> <span class="o">=</span> <span class="n">pGraphics</span><span class="o">-&gt;</span><span class="n">LoadPointerToBitmap</span><span class="p">(</span><span class="n">KNOB_ID</span><span class="p">,</span> <span class="n">KNOB_FN</span><span class="p">,</span> <span class="n">kKnobFrames</span><span class="p">);</span>
+  <span class="n">pGraphics</span><span class="o">-&gt;</span><span class="n">AttachControl</span><span class="p">(</span><span class="k">new</span> <span class="n">IKnobMultiControl</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="n">kGainX</span><span class="p">,</span> <span class="n">kGainY</span><span class="p">,</span> <span class="n">kGain</span><span class="p">,</span> <span class="n">knob</span><span class="p">));</span>
+  <span class="n">pGraphics</span><span class="o">-&gt;</span><span class="n">AttachControl</span><span class="p">(</span><span class="k">new</span> <span class="n">IKnobMultiControl</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="n">kDelayMS</span><span class="p">,</span> <span class="n">knob</span><span class="p">));</span>
+  <span class="n">pGraphics</span><span class="o">-&gt;</span><span class="n">AttachControl</span><span class="p">(</span><span class="k">new</span> <span class="n">IKnobMultiControl</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="mi">80</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="n">kFeedbackPC</span><span class="p">,</span> <span class="n">knob</span><span class="p">));</span>
+  <span class="n">pGraphics</span><span class="o">-&gt;</span><span class="n">AttachControl</span><span class="p">(</span><span class="k">new</span> <span class="n">IKnobMultiControl</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="mi">140</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="n">kWetPC</span><span class="p">,</span> <span class="n">knob</span><span class="p">));</span>
+   
+
+  
+  <span class="n">AttachGraphics</span><span class="p">(</span><span class="n">pGraphics</span><span class="p">);</span>
+
+  <span class="c1">//MakePreset("preset 1", ... );</span>
+  <span class="n">MakeDefaultPreset</span><span class="p">((</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span> <span class="s">"-"</span><span class="p">,</span> <span class="n">kNumPrograms</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="err">…</span>
+</code></pre></div></div>
+
+<p>Now just build that with the APP scheme. We should get a window with 4 knobs. Our new params are the ones in a row beneath the gain control. Lovely.</p>
+
+<p><img src="/images/2.5.jpeg" alt="Screenshot1" class="center" />
+￼</p>
+
+<p>…but useless at the moment. Lets make these controls do something.</p>
+
+<h2 id="cook-them-vars">Cook them Vars</h2>
+
+<p>let’s get these guys talking to our member variables that we set up at the beginning. Go to onParamChange and you can see a switch with the gain control set up to change the mGain variable. You can see it divides by 100 because the input is a percentage but mGain is used as a scaling coefficient (so it needs to be between 1 and 0).</p>
+
+<p>This switch is a good idea because it means it’ll only update the parameter that has been changed. However, we only have a few params so we are going to disregard it. We’ll make a new member function of our class called cookVars() which will update all the variables. We’ll just call this in OnParamChange.</p>
+
+<p>In the .h file add a new public method called cookVars().</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">…</span>
+<span class="k">public</span><span class="o">:</span>
+  <span class="n">DelayPlugin</span><span class="p">(</span><span class="n">IPlugInstanceInfo</span> <span class="n">instanceInfo</span><span class="p">);</span>
+  <span class="o">~</span><span class="n">DelayPlugin</span><span class="p">();</span>
+
+  <span class="kt">void</span> <span class="n">Reset</span><span class="p">();</span>
+  <span class="kt">void</span> <span class="n">OnParamChange</span><span class="p">(</span><span class="kt">int</span> <span class="n">paramIdx</span><span class="p">);</span>
+  <span class="kt">void</span> <span class="n">ProcessDoubleReplacing</span><span class="p">(</span><span class="kt">double</span><span class="o">**</span> <span class="n">inputs</span><span class="p">,</span> <span class="kt">double</span><span class="o">**</span> <span class="n">outputs</span><span class="p">,</span> <span class="kt">int</span> <span class="n">nFrames</span><span class="p">);</span>
+  <span class="kt">void</span> <span class="n">cookVars</span><span class="p">();</span>
+<span class="err">…</span>
+</code></pre></div></div>
+
+<p>Let’s implement this in the .cpp file. We’ll do it just above OnParamChange(). For the member variable mDelaySam we want to get the kDelayMS value and multiply that by (the sampling rate / 1000.0). The wet level and the feedback level are like the gain, we want to go from per cent to scaling factor. so just divide by 100.0. So our cooker is going to look like this:</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">…</span>
+<span class="kt">void</span> <span class="n">DelayPlugin</span><span class="o">::</span><span class="n">cookVars</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="n">mDelaySam</span> <span class="o">=</span> <span class="n">GetParam</span><span class="p">(</span><span class="n">kDelayMS</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">Value</span><span class="p">()</span> <span class="o">*</span> <span class="n">GetSampleRate</span><span class="p">()</span> <span class="o">/</span> <span class="mf">1000.0</span><span class="p">;</span>
+  <span class="n">mFeedback</span> <span class="o">=</span> <span class="n">GetParam</span><span class="p">(</span><span class="n">kFeedbackPC</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">Value</span><span class="p">()</span> <span class="o">/</span> <span class="mf">100.0</span><span class="p">;</span>
+  <span class="n">mWet</span> <span class="o">=</span> <span class="n">GetParam</span><span class="p">(</span><span class="n">kWetPC</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">Value</span><span class="p">()</span> <span class="o">/</span> <span class="mf">100.0</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="err">…</span>
+</code></pre></div></div>
+
+<p>now we want to call this in OnParamChange. You can chuck the switch but don’t get rid of the IMutexLock.</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">…</span>
+<span class="kt">void</span> <span class="n">DelayPlugin</span><span class="o">::</span><span class="n">OnParamChange</span><span class="p">(</span><span class="kt">int</span> <span class="n">paramIdx</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">IMutexLock</span> <span class="n">lock</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+  <span class="n">cookVars</span><span class="p">();</span>
+<span class="p">}</span>
+<span class="err">…</span>
+</code></pre></div></div>
+
+<p>Also call it at the Reset method: </p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">…</span>
+<span class="kt">void</span> <span class="n">DelayPlugin</span><span class="o">::</span><span class="n">Reset</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="n">TRACE</span><span class="p">;</span>
+  <span class="n">IMutexLock</span> <span class="n">lock</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+  <span class="n">cookVars</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="err">…</span>
+</code></pre></div></div>
+
+<h2 id="circular-buffer">Circular Buffer</h2>
+
+<p>Ok now everything is talking to everything. Lets set up our delay line buffer. We need some new member variables. A pointer that points to our buffer of samples, a read and write index and a variable to hold the length of the buffer. Let’s make these in the .h file under the ones we’ve already added. we could initialise these in the constructor but here will do fine for this example. mpBuffer is pointing at NULL because we don’t have a buffer yet. Initialize the other vars as follows just for completeness sake.</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">…</span>
+<span class="k">private</span><span class="o">:</span>
+  <span class="kt">double</span> <span class="n">mGain</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">;</span>
+  <span class="kt">double</span> <span class="n">mDelaySam</span> <span class="o">=</span> <span class="mf">0.</span><span class="p">;</span>
+  <span class="kt">double</span> <span class="n">mFeedback</span> <span class="o">=</span> <span class="mf">0.</span><span class="p">;</span>
+  <span class="kt">double</span> <span class="n">mWet</span> <span class="o">=</span> <span class="mf">0.</span><span class="p">;</span>
+  
+  <span class="kt">double</span><span class="o">*</span> <span class="n">mpBuffer</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+  <span class="kt">int</span> <span class="n">mReadIndex</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="kt">int</span> <span class="n">mWriteIndex</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="kt">int</span> <span class="n">mBufferSize</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="err">…</span>
+</code></pre></div></div>
+
+<p>The reason we haven’t declared a buffer yet is because it’s length depends on our sample rate which a) we don’t know yet and b) could change while the plugin is operating (conceivably). So we’ll make it in the Reset() function, which is automatically called after the constructor and also whenever the sample rate changes. Head over to Reset() and we’ll put it in before the call to cookVars() we made earlier. First we need to figure out the number of samples we want in out buffer. we’re going to go for 2 seconds of delay maximum. We’re gonna then check if there is a buffer already, if so it’ll get deleted. Then we’ll make a new one using “new” - so it’s in the heap. We’ll do this because it could be quite large for the stack. If this stack / heap business is new to you I’m impressed you’ve come this far, well done. Read up <a href="http://www.learncpp.com/cpp-tutorial/79-the-stack-and-the-heap/">here</a>:</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">…</span>
+<span class="kt">void</span> <span class="n">DelayPlugin</span><span class="o">::</span><span class="n">Reset</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="n">TRACE</span><span class="p">;</span>
+  <span class="n">IMutexLock</span> <span class="n">lock</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+  
+  <span class="n">mBufferSize</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">GetSampleRate</span><span class="p">();</span>
+  <span class="k">if</span><span class="p">(</span><span class="n">mpBuffer</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">delete</span> <span class="p">[]</span> <span class="n">mpBuffer</span><span class="p">;</span>
+  <span class="p">}</span>
+  
+  <span class="n">mpBuffer</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">double</span><span class="p">[</span><span class="n">mBufferSize</span><span class="p">];</span>
+  
+  <span class="n">cookVars</span><span class="p">();</span>
+<span class="p">}</span>
+<span class="err">…</span>
+</code></pre></div></div>
+
+<p>Since we’ve used “new” we have to use “delete”, so we’ll do this in the destructor, which is empty so far, but just under the constructor. Stick in a if statement and a delete:</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">…</span>
+<span class="n">DelayPlugin</span><span class="o">::~</span><span class="n">DelayPlugin</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="k">if</span><span class="p">(</span><span class="n">mpBuffer</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">delete</span> <span class="p">[]</span> <span class="n">mpBuffer</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+<span class="err">…</span>
+</code></pre></div></div>
+
+<p>Now whenever we want to reset this buffer we’ll want to fill it with “0” values. So that a) when it’s created new it isn’t full of garbage and b) so that on the first cycle through it will read out silence. We’ll do this at various points so let’s make a function for it. in the .h file add a new method called resetDelay().</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">…</span>
+<span class="k">class</span> <span class="nc">DelayPlugin</span> <span class="o">:</span> <span class="k">public</span> <span class="n">IPlug</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+  <span class="n">DelayPlugin</span><span class="p">(</span><span class="n">IPlugInstanceInfo</span> <span class="n">instanceInfo</span><span class="p">);</span>
+  <span class="o">~</span><span class="n">DelayPlugin</span><span class="p">();</span>
+
+  <span class="kt">void</span> <span class="n">Reset</span><span class="p">();</span>
+  <span class="kt">void</span> <span class="n">OnParamChange</span><span class="p">(</span><span class="kt">int</span> <span class="n">paramIdx</span><span class="p">);</span>
+  <span class="kt">void</span> <span class="n">ProcessDoubleReplacing</span><span class="p">(</span><span class="kt">double</span><span class="o">**</span> <span class="n">inputs</span><span class="p">,</span> <span class="kt">double</span><span class="o">**</span> <span class="n">outputs</span><span class="p">,</span> <span class="kt">int</span> <span class="n">nFrames</span><span class="p">);</span>
+  <span class="kt">void</span> <span class="n">cookVars</span><span class="p">();</span>
+  <span class="kt">void</span> <span class="n">resetDelay</span><span class="p">();</span>
+<span class="err">…</span>
+</code></pre></div></div>
+
+<p>We’ll use “memset” to fill the buffer with 0s and then also we’ll set our read and write index to 0. Lets do the implementation in the .cpp file. Memset takes the buffer, the value to set all the memory to, and the number of bytes, which here is the length of our buffer multiplied by the size of a double (because our buffer is doubles). Let’s also set the read and write index to 0 here too:</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">…</span>
+<span class="kt">void</span> <span class="n">DelayPlugin</span><span class="o">::</span><span class="n">resetDelay</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="k">if</span><span class="p">(</span><span class="n">mpBuffer</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">memset</span><span class="p">(</span><span class="n">mpBuffer</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">mBufferSize</span><span class="o">*</span><span class="k">sizeof</span><span class="p">(</span><span class="kt">double</span><span class="p">));</span>
+  <span class="p">}</span>
+  
+  <span class="n">mWriteIndex</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="n">mReadIndex</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="err">…</span>
+</code></pre></div></div>
+
+<p>Have the Reset() method call our resetDelay() method so that the buffer is cleared whenever the plugin is reset. Make sure it’s before the variables are cooked!</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">…</span>
+<span class="kt">void</span> <span class="n">DelayPlugin</span><span class="o">::</span><span class="n">Reset</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="n">TRACE</span><span class="p">;</span>
+  <span class="n">IMutexLock</span> <span class="n">lock</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+  
+  <span class="n">mBufferSize</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">GetSampleRate</span><span class="p">();</span>
+  <span class="k">if</span><span class="p">(</span><span class="n">mpBuffer</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">delete</span> <span class="p">[]</span> <span class="n">mpBuffer</span><span class="p">;</span>
+  <span class="p">}</span>
+  
+  <span class="n">mpBuffer</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">double</span><span class="p">[</span><span class="n">mBufferSize</span><span class="p">];</span>
+  <span class="n">resetDelay</span><span class="p">();</span> 
+  <span class="n">cookVars</span><span class="p">();</span>
+<span class="p">}</span>
+<span class="err">…</span>
+</code></pre></div></div>
+
+<h2 id="read-index">Read Index</h2>
+
+<p>Now we need make sure the read index is the right distance behind the write index in terms of samples. This difference is the length of our delay. If that doesn’t make sense to you then re-read the theory section of this article at the top of the page. We’ll increment the write index in the ProcessDoubleReplacing() method, the method that handles each frame of audio processing However, before that we need to make sure the read index stays in the right place relative to it.</p>
+
+<p>The best place to set this is whenever we cook the variables (since this happens whenever a parameter is changed by the user). So go back to the cookVars() implementation and change it to take care of the read index. Since we are taking away from the write value, we need to insure that if the resulting subtraction is below 0 we have to wrap backwards to the far end of the buffer.</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">…</span>
+<span class="kt">void</span> <span class="n">DelayPlugin</span><span class="o">::</span><span class="n">cookVars</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="n">mDelaySam</span> <span class="o">=</span> <span class="n">GetParam</span><span class="p">(</span><span class="n">kDelayMS</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">Value</span><span class="p">()</span> <span class="o">*</span> <span class="n">GetSampleRate</span><span class="p">()</span> <span class="o">/</span> <span class="mf">1000.0</span><span class="p">;</span>
+  <span class="n">mFeedback</span> <span class="o">=</span> <span class="n">GetParam</span><span class="p">(</span><span class="n">kFeedbackPC</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">Value</span><span class="p">()</span> <span class="o">/</span> <span class="mf">100.0</span><span class="p">;</span>
+  <span class="n">mWet</span> <span class="o">=</span> <span class="n">GetParam</span><span class="p">(</span><span class="n">kWetPC</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">Value</span><span class="p">()</span> <span class="o">/</span> <span class="mf">100.0</span><span class="p">;</span>
+  
+  <span class="n">mReadIndex</span> <span class="o">=</span> <span class="n">mWriteIndex</span> <span class="o">-</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">mDelaySam</span><span class="p">;</span>
+  <span class="k">if</span><span class="p">(</span><span class="n">mReadIndex</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">mReadIndex</span> <span class="o">+=</span> <span class="n">mBufferSize</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+<span class="err">…</span>
+</code></pre></div></div>
+
+<h2 id="processing-the-audio">Processing the audio</h2>
+
+<p>That’s all the fiddly stuff done! Now all we need to do is process the audio as it comes through. We’ll just do this in mono for now. So we’ll work with the left (mono) channel and then just copy it over to the right afterwards.</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">…</span>
+<span class="kt">void</span> <span class="n">DelayPlugin</span><span class="o">::</span><span class="n">ProcessDoubleReplacing</span><span class="p">(</span><span class="kt">double</span><span class="o">**</span> <span class="n">inputs</span><span class="p">,</span> <span class="kt">double</span><span class="o">**</span> <span class="n">outputs</span><span class="p">,</span> <span class="kt">int</span> <span class="n">nFrames</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="c1">// Mutex is already locked for us.</span>
+
+  <span class="kt">double</span><span class="o">*</span> <span class="n">in1</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+  <span class="kt">double</span><span class="o">*</span> <span class="n">in2</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+  <span class="kt">double</span><span class="o">*</span> <span class="n">out1</span> <span class="o">=</span> <span class="n">outputs</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+  <span class="kt">double</span><span class="o">*</span> <span class="n">out2</span> <span class="o">=</span> <span class="n">outputs</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+
+  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">s</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">s</span> <span class="o">&lt;</span> <span class="n">nFrames</span><span class="p">;</span> <span class="o">++</span><span class="n">s</span><span class="p">,</span> <span class="o">++</span><span class="n">in1</span><span class="p">,</span> <span class="o">++</span><span class="n">in2</span><span class="p">,</span> <span class="o">++</span><span class="n">out1</span><span class="p">,</span> <span class="o">++</span><span class="n">out2</span><span class="p">)</span> <span class="c1">// for loop to cycle through frame.</span>
+  <span class="p">{</span>
+    
+    <span class="c1">//first we read our delayed output</span>
+    <span class="kt">double</span> <span class="n">yn</span> <span class="o">=</span> <span class="n">mpBuffer</span><span class="p">[</span><span class="n">mReadIndex</span><span class="p">];</span>
+    
+    
+    <span class="c1">//if the delay is 0 samples we just feed it the input</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">mDelaySam</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="n">yn</span> <span class="o">=</span> <span class="o">*</span><span class="n">in1</span><span class="p">;</span>
+    <span class="p">}</span>
+    
+    
+    <span class="c1">//now write to our delay buffer</span>
+    
+    <span class="n">mpBuffer</span><span class="p">[</span><span class="n">mWriteIndex</span><span class="p">]</span> <span class="o">=</span> <span class="o">*</span><span class="n">in1</span> <span class="o">+</span> <span class="n">mFeedback</span> <span class="o">*</span> <span class="n">yn</span><span class="p">;</span>
+    
+    
+    <span class="c1">//.. and then perform the calculation for the output. Notice how the *in is multiplied by 1 - mWet (which gives the dry level, since wet + dry = 1)</span>
+    <span class="o">*</span><span class="n">out1</span> <span class="o">=</span>  <span class="p">(</span> <span class="n">mWet</span> <span class="o">*</span> <span class="n">yn</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">mWet</span><span class="p">)</span> <span class="o">*</span> <span class="o">*</span><span class="n">in1</span> <span class="p">);</span>
+    
+    
+    <span class="c1">//increment the write index, wrapping if it goes out of bounds.</span>
+    <span class="o">++</span><span class="n">mWriteIndex</span><span class="p">;</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">mWriteIndex</span> <span class="o">&gt;=</span> <span class="n">mBufferSize</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="n">mWriteIndex</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="p">}</span>
+    
+    <span class="c1">//same with the read index</span>
+    <span class="o">++</span><span class="n">mReadIndex</span><span class="p">;</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">mReadIndex</span> <span class="o">&gt;=</span> <span class="n">mBufferSize</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="n">mReadIndex</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="p">}</span>
+    
+    <span class="c1">//because we are working in mono we'll just copy the left output to the right output.</span>
+    <span class="o">*</span><span class="n">out2</span> <span class="o">=</span> <span class="o">*</span><span class="n">out1</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+<span class="err">…</span>
+</code></pre></div></div>
+
+<p>Thats it! Build that and you have got yourself a delay effect!</p>
+
+<p>Note our gain knob is not doing anything now. So best go back through and take out all the bits for it (in the .h file, the constructor and the enums at the top of the .cpp)</p>
+
+<p>Build it as a VST or AU and have a play in your favourite DAW. Surprisingly good considering how simple it is, right?</p>
+
+<p>Thanks for following along with this. I hope you enjoyed, there is more to come! This tutorial took a lot of the key information and design patterns from <a href="https://www.amazon.com/Designing-Audio-Effect-Plug-Ins-Processing/dp/0240825152">Will Pirkle’s Effects book</a>. It’s well worth a purchase. While the examples in his book ain’t for iPlug it’s really quite simple to translate the information.</p>
+
+<p>The final project is <a href="https://github.com/larzeitlin/SimpleDelayPlugin">here</a> on GitHub if you  need it.</p>
+

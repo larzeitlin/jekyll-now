@@ -1,0 +1,340 @@
+<p>There are a lot of introductory descriptions of the Fourier transforms on the web, so to do yet another demands some justification. Here’s the justification:</p>
+
+<ul>
+  <li>
+    <p>While there are many introductions to this topic, a lot of them are really unhelpful to an entry-level reader.</p>
+  </li>
+  <li>
+    <p>For the sake of completeness. There are topics that I’d like to write future posts about which require this information to be understood in at least a general way.</p>
+  </li>
+</ul>
+
+<p><strong>So, what’s the objective here?</strong></p>
+
+<p>Digital signals in sounds usually come to us in the time-domain form. That is to say a linear array of values, each relating to a sample in time.</p>
+
+<p>The fundamental question we are asking is this:</p>
+
+<ul>
+  <li><em>“how do we make a frequency-domain representation of a signal?”</em></li>
+</ul>
+
+<p>What we will see is that this question is really the same question as:</p>
+
+<ul>
+  <li><em>“What sinusoids are present in a signal, and what is their amplitude and phase?”</em></li>
+</ul>
+
+<h2 id="a-roundabout-introduction">A Roundabout Introduction</h2>
+
+<p><a href="https://en.wikipedia.org/wiki/Joseph_Fourier">Joseph Fourier</a> was a French mathematician who was doing his thing at the end of the 18th to the beginning of the 19th centuries. Two things that we will discuss carry his name: The Fourier Transforms and Fourier Series. A Fourier series is a representation of a signal as a sum of a series of sinusoids. The Fourier Transforms are, as far as we are concerned, algorithms for identifying which sinusoids are in that series. So it’s essentially a the recipe of a signal, where the raw ingredients are sinusoids.</p>
+
+<h3 id="sinusoids-circles-and-epicycles">Sinusoids, circles and epicycles</h3>
+
+<p>Let’s start by thinking of a sinusoid as an aspect of circular movement in relation to time. As we probably all learned in school at some stage, sine and cosine functions describe the ratios of various sides of a right-angle triangle as its  angle <script type="math/tex">\theta</script> changes. You may have seen some sort of visual representation of this with a right-angle triangle in the unit circle, like this:</p>
+
+<p><img src="/images/4.1.gif" alt="image alt text" class="center" /></p>
+
+<p>If we add a more circles to our system we can start to make more elaborate periodic signals, like so:</p>
+
+<p><img src="/images/4.2.gif" alt="image alt text" class="center" /></p>
+
+<p>So we have this idea that given enough circles, you can make all sorts of complicated 2D patterns.</p>
+
+<p>This idea was well understood way back into antiquity. Many scientists through history have been concerned with mapping out the movements of the stars. Since the idea that the <a href="https://en.wikipedia.org/wiki/Geocentric_model">earth was the center of the universe</a> was generally accepted for a long time, many extremely elaborate models of circles within circles were dreamt up to explain the movements of the heavenly bodies. This method of circles with circles was called <em>deferent and epicycle</em>. Despite being wrong, this vision of the universe managed to give pretty accurate predictions, and was relied on for millennia until Copernicus came along with <a href="https://en.wikipedia.org/wiki/Heliocentrism">heliocentrism</a>.</p>
+
+<p>Remember the popular toy <a href="https://en.wikipedia.org/wiki/Spirograph">Spirograph</a>? That was essentially based on the idea of epicycles. The image below shows the kind of beautiful mess that epicycles and geocentricism gave us:</p>
+
+<p><img src="/images/4.3.jpg" width="500" class="center" /></p>
+
+<p>In the words of <a href="https://en.wikipedia.org/wiki/Norwood_Russell_Hanson">Norwood Russell Hanson</a>:</p>
+
+<p><em>“There is no bilaterally-symmetrical, nor eccentrically-periodic curve used in any branch of astrophysics or observational astronomy which could not be smoothly plotted as the resultant motion of a point turning within a constellation of epicycles, finite in number, revolving around a fixed deferent.”</em></p>
+
+<p>Rather than trying to work through any formal proof here, I think it’s quite sufficient at this stage to just assume the following: Just like having enough circles can explain the movement of all the stars in the redundant geocentric model - given enough sinusoids, using <a href="https://larzeitlin.github.io/LPF/">destructive and constructive</a> interference, we could make <strong>any signal we want.</strong></p>
+
+<p>We <em>could</em> demonstrate this by proving that we can make a single-sample impulse and then extrapolating that to show we could add those impulses together to make any series of samples. But I think that’s a distraction here, and the end result is intuitive.</p>
+
+<h3 id="amplitude-and-phase">Amplitude and Phase</h3>
+
+<p>What we do need is a method to find out <strong>which sinusoids</strong> are in a given signal. Just the frequency of those sinusoids isn’t enough information. We also need their amplitude and phase properties. You know what those are, right? Amplitude is how loud the sinusoid is, phase is its offset in time.</p>
+
+<p>Here’s a sinusoid with its amplitude being changed:</p>
+
+<p><img src="/images/4.5.gif" alt="image alt text" class="center" /></p>
+
+<p>And here’s one with its phase value being changed:</p>
+
+<p><img src="/images/4.4.gif" alt="image alt text" class="center" /></p>
+
+<p>Phase is aurally a strange property because we don’t really hear it in the direct sense we hear frequency or amplitude, however it can affect sounds differently in different situations from resultant <a href="https://larzeitlin.github.io/LPF/">destructive and constructive interference.</a></p>
+
+<p>So, as we discussed above, with enough sinusoids with various frequency, amplitude and phase values can make any signal we like. But how to find out which frequencies, amplitudes and phase values we need?</p>
+
+<p>Hold that thought. We’re going to need to make sure some other mathematical dependencies are installed in your brain-sacks in order to solve this problem. If these concepts are all new to you, or you want more depth on these topics then further reading on them is definitely recommended, we’ll barely scratch the surface here. Links at the bottom of the article</p>
+
+<h2 id="imaginary-and-complex-numbers">Imaginary and Complex Numbers</h2>
+
+<script type="math/tex; mode=display">i = \sqrt{−1}</script>
+
+<p>This number i, sometimes called j by engineers, is the unit of imaginary numbers. Mathematics was having a hard time reconciling the idea of square roots with negative numbers, because it makes no intuitive sense to to find a number that multiplies with itself to make a negative. The solution was to just give them a new name.</p>
+
+<p><em>Imaginary numbers</em> were first described as such by René Descartes, who was essentially taking the piss out of what he and many mathematicians saw as a bandage-job and not proper maths. However, as time passed it became clear that this solution opened up a whole bunch of interesting possibilities that so-called <em>real</em> numbers didn’t offer.</p>
+
+<p>Incidentally, if you think <em>imaginary</em> is a rubbish name for them, then you are not alone. Gauss suggested <em>lateral numbers</em> as a better name, which makes a lot of sense to me.</p>
+
+<p>We can treat i in many of the same ways we would an algebraic variable, which is handy. So <script type="math/tex">3\times 2i  = 6i</script> or <script type="math/tex">\frac{10i}{2} = 5i</script> and so on.</p>
+
+<p>We can also use them alongside real numbers. The combination of imaginary and real numbers are what we call <strong>complex numbers</strong>. This is usually just written as an addition, for example <script type="math/tex">10 + 5i</script>. While these complex numbers don’t really have a position on a normal 1 dimensional number line, we can position them in two dimensions. This is usually done with the x-axis as real and the y-axis as imaginary. Here’s <script type="math/tex">4 + 3i</script> in the <strong>complex plane:</strong></p>
+
+<p><img src="/images/4.6.png" alt="image alt text" class="center" /></p>
+
+<p>As with any position in a 2D space, we can use Cartesian coordinates, but we can also talk about it in polar coordinates, terms of a magnitude and angle.</p>
+
+<p><img src="/images/4.7.png" alt="image alt text" class="center" /></p>
+
+<p>Using basic trigonometry we can work out its polar coordinates from the Cartesian ones. We know that the magnitude, which is just the hypotenuse of a right-angle triangle, and therefore equal to <script type="math/tex">\sqrt{real^2 + ima^2}</script>, and the angle is equal to <script type="math/tex">\tan^{−1}({\frac{ima}{real}})</script>.</p>
+
+<p>Eventually we’ll use complex numbers to start talking about circular movements in the complex plane, and that will be very useful for figuring out what sinusoids are living in a signal. Before that let’s boot up some other concepts we’ll need.</p>
+
+<h2 id="eulers-number">Euler’s Number</h2>
+
+<p>Usually known as simply e, Euler’s number is a mathematical constant. It’s a real, <a href="https://en.wikipedia.org/wiki/Irrational_number">irrational</a> number that’s approximately equal to 2.71828. This number is important to us because it’s intrinsically linked to continuous growth. We can imagine how we get to e through an analogy to compound interest.</p>
+
+<h3 id="growth">Growth</h3>
+
+<p>This section seems pretty unrelated at first, but it’s actually key to understanding the DFT. I should add that this bank loan analogy is just an analogy. I don’t understand anything about finance or loans. Just go with it.</p>
+
+<p>Imagine we take out a loan from the bank in January. It’s only a small loan, just £1.00 in fact! However, we get a really bad interest rate for our loan: 100% per year. Now after a year how much do we owe the bank? Well, it depends on when they calculate the interest. If it’s at the end of the year, for example:</p>
+
+<ul>
+  <li><em>Then we owe them the original £1 + another £1 of interest. That’s £2.</em></li>
+</ul>
+
+<p>But what if they calculate it half-way through the year?</p>
+
+<ul>
+  <li><em>That’d be 50% in June and then 50% in January. So in June the debt becomes  £1 + 50% of £1. So a total of £1.50. Then we get to January and we have £1.50 + 50% of £1.50, so a total of £2.25. That’s a worse deal for us!</em></li>
+</ul>
+
+<p>OK, so how about 4 times a year?</p>
+
+<ul>
+  <li><em>That’s £1 + £0.25 = £1.25 in March, then by June we’re at £1.56 ish. September takes us to around £1.95. Now by the New Year we’re at about £2.44.</em></li>
+</ul>
+
+<p>We can see a pattern forming, the more we divide up the year, the more money we owe by the end of it. This value doesn’t shoot up uncontrollably however, it converges around the value £2.71828… our old friend e.</p>
+
+<p>So, e is the value that you get if you <strong>grow 1 continuously by 100% for exactly 1 unit of time.</strong></p>
+
+<p>We can use e as a base of an exponent to grow 1 by amounts other than 100%:</p>
+
+<ul>
+  <li>
+    <p>as we’ve already seen, growing at 100% yields: <script type="math/tex">e^1 \approx 2.71828</script></p>
+  </li>
+  <li>
+    <p>Growing at 200%: <script type="math/tex">e^2 \approx 7.368</script></p>
+  </li>
+  <li>
+    <p>Growing at 300%: <script type="math/tex">e^3 \approx 20.086</script></p>
+  </li>
+</ul>
+
+<p>These are the values that you’d end up with if our initial interest rate was 200% or 300% respectively. So, going forward, whenever we see something in the format <script type="math/tex">e^n</script>, we can think of it as 1 being grown for one unit of time an <script type="math/tex">n\times 100\%</script>.</p>
+
+<p>What about for longer than 1 unit of time? Well, we can break down n into a multiplication. What n really equals is <script type="math/tex">rate \times duration</script>. Why? Well growing something at 100% for 3 units of time is really just the same result as growing it at 300% for one unit of time.</p>
+
+<p>What about if we don’t want our initial loan to be £1? After all, it’s a silly amount to be borrowing. Well we can just multiply the whole thing by the initial amount we want, so we end up with a sort of formula for continuous growth:</p>
+
+<script type="math/tex; mode=display">a \times e^{rd}</script>
+
+<p>Where a equals our initial amount, r is the rate and d is the duration.</p>
+
+<p>For example, if we had some gray goo that grows continuously at a rate 300%. If we start with 10 grams of gray goo on the beginning of Monday, by the end of Wednesday we’ll have <script type="math/tex">10 \times e^{3 \times 3} = 81030.8392758</script>, so about 81.03kg of gray goo!</p>
+
+<p><em>How is all this gray goo stuff helping us with the Fourier Transforms?</em></p>
+
+<p>This all seems pretty far away from our main agenda now, I know, but what we are going to see is that <strong>growth</strong> really translates into <strong>rotation</strong> when we start using e in the complex plane. That is going to help us make a tool for seeking out sinusoids in a signal.</p>
+
+<h3 id="imaginary-growth-is-anticlockwise-rotation">Imaginary Growth is Anticlockwise Rotation</h3>
+
+<p>To turn growth into rotation, let’s try growing 1 by i, so using our formula this is <script type="math/tex">e^i</script>. If we put this into a calculator we’ll get back something like: <script type="math/tex">0.540302306 + 0.841470985 i</script>.</p>
+
+<p>What happened there? We got a complex number, both components have a value between 0 and 1. Maybe you would have expected at least the real component to get bigger since we started with 1 and grew it. Things get a bit clearer if we think <script type="math/tex">e^i</script> in polar coordinates.</p>
+
+<p>Remember the magnitude is  <script type="math/tex">\sqrt{real^2 + ima^2}</script>.</p>
+
+<p>So that’s <script type="math/tex">\sqrt{0.540302306^2 + 0.841470985^2} = 1.00000000023</script> really very close to 1 (we got a bit of rounding error from the calculation of the real and imaginary components above)</p>
+
+<p>And recall the angle is equal to <script type="math/tex">\tan^{−1}({\frac{ima}{real}})</script> .</p>
+
+<p>So <script type="math/tex">\tan^{−1} \left( \frac{0.841470985}{0.540302306}   \right ) = 57.29577951282339</script>.  Which doesn’t seem too special until you convert it from degrees to radians. Then you’ll see the answer comes to (allowing for the same rounding error) 1.</p>
+
+<p>So what’s really happened is that we’ve grown our initial 1 but, instead of going further along the real axis, it has grown along the edge of a perimeter circle exactly one radian. We’ve rotated it by 1.</p>
+
+<p><img src="/images/4.8.png" alt="image alt text" class="center" /></p>
+
+<p>The upshot is we can use e to make circles. This is the basis of the <strong>complex sinusoid.</strong></p>
+
+<h2 id="complex-sinusoid">Complex sinusoid</h2>
+
+<p>The complex sinusoid is really just the sum of two sinusoids, one real and one imaginary. These two sinusoids are in <em>phase quadrature</em>, which is just a fancy way of saying exactly halfway between in phase and perfectly out of phase. This is also called sometimes called an <em>orthogonal relationship</em>, meaning they are at right-angles. This makes sense because their phase difference is 90 degrees.</p>
+
+<p>The most obvious example of sinusoids in phase quadrature are the sine and cosine functions; sine is really just a cosine that’s been shifted forward by 90 degrees.</p>
+
+<p>Think about quadrature as when sinusoids of the same frequency are at <strong>the most unrelated they can possibly be.</strong> Which is to say, while in phase or close to it they match pretty well up, and while perfectly out of phase or close to it they are not far off being mirror images of each other. In quadrature they are as dissimilar as can be without becoming opposite.</p>
+
+<p>We can use the rotational abilities of Euler’s number to generate our complex sinusoid. As we saw above, we can use e to rotate a point in a circular arc. At any stage of rotation the position of that point can be described by Cartesian coordinates, which are just the two sides of a right-angle triangle.</p>
+
+<p>Along the real axis we’ll have a length (the adjacent side of a right-angle triangle) that will oscillate as a cosine function, and along the imaginary axis the length (which is same length as the opposite side of a right-angle triangle)  will describe a sine function. This is how we use the magic of e to make a complex sinusoid:</p>
+
+<script type="math/tex; mode=display">e^{i\omega t} = \cos(\omega t) + i\sin(\omega t)</script>
+
+<p>Where <script type="math/tex">t</script> is the time and <script type="math/tex">\omega</script> is frequency.</p>
+
+<p>This is an alternative form of Euler’s formula. This gives rise to one of the most beautiful mathematical identities out there, known as <a href="https://en.wikipedia.org/wiki/Euler%27s_identity">Euler’s identity</a>. It’s a related but tangential topic which I encourage you to read about.</p>
+
+<p>Taking the formula above, if we keep <script type="math/tex">\omega = 1</script> and increment through <script type="math/tex">t</script> in time, we the situation described by the animation below: The imaginary component is in blue and the real component is in green.</p>
+
+<p><img src="/images/4.9.gif" alt="image alt text" class="center" /></p>
+
+<p>There is no magic to having a real and an imaginary component, it’s just a convenience. We need two sinusoids in quadrature, as we will see this helps us get the phase information of the sinusoids inside a signal. Using a complex sinusoid helps us keep it all compact and tidy.</p>
+
+<h2 id="the-discrete-fourier-transform">The Discrete Fourier Transform</h2>
+
+<p>We’ve got all the bits we need! We’re going to just dive in:</p>
+
+<p><img src="/images/4.10.png" width="500" class="center" /></p>
+
+<p>OK, there’s a bunch going on here, it’ll take a bit of unpicking:</p>
+
+<p>We need to know that <script type="math/tex">x</script> is the input signal and <script type="math/tex">X</script> is the output spectrum. <script type="math/tex">N</script> is the number of samples in our input signal. Notice the distinction between <script type="math/tex">N</script> and <script type="math/tex">n</script>, which is really the time index of our input signal. Everyone else you’ve already met, or is defined in the equation. We’ll go through with the colours:</p>
+
+<ul>
+  <li>
+    <p><em style="color: red">Frequency bin k in the output spectrum X</em> equals…</p>
+  </li>
+  <li>
+    <p><em style="color: green">the sum, from n = 0 to n = the number of samples - 1</em>, of…</p>
+  </li>
+  <li>
+    <p><em style="color: purple">The nth sample of our input signal</em></p>
+  </li>
+  <li>
+    <p>Multiplied by</p>
+  </li>
+  <li>
+    <p><em style="color: magenta">e to the</em> …</p>
+  </li>
+  <li>
+    <p><em style="color: brown">-i times a full circle’s worth of radians (<script type="math/tex">\pi 2</script>)  times the k (bin number) times…</em></p>
+  </li>
+  <li>
+    <p><em style="color: blue">n (the present sample number) over N (the number of samples in our input signal)</em></p>
+  </li>
+</ul>
+
+<p>Let’s clarify things a bit. <em style="color: red">Frequency bins</em> are essentially the frequencies that we will graph on our output spectrum. There are as many of them as there are samples in the input signal. They represent the sinusoids in the signal. So X is made up of a bunch of bins, which we keep track of with the variable k.</p>
+
+<p>There are two variables in this that we are looping through: k and n. The k is the bin frequencies and the n is the time indices. Think of the n loop as being <strong>inside</strong> the k loop. For every new k we get the full range of n.</p>
+
+<p>The <em style="color: green">sum</em> goes from 0 to N-1 (so thats N many). From this we can see that for every frequency bin we are summing together N things. That’s potentially a lot of summing, which is why the DFT can sometimes be slow. Inside that sum is our input signal multiplied by a complex sinusoid. The exponent of our complex sinusoid has a <em style="color: brown">rate</em>, which is <script type="math/tex">2 \pi</script> radians (ie. all the way round) times <em style="color: red">k</em>, which is the frequency. The exponent also has a <em style="color: blue">time</em>, which is n samples out of a total of N.</p>
+
+<p>Notice the sign of the exponent is negative, because we are rotating here clockwise rather than an anticlockwise as we have been before.</p>
+
+<p>As we already know, the <em style="color: magenta">complex sinusoid</em> is made up of a real cosine function and an imaginary sine function. So we could just as well write in ether of these forms:</p>
+
+<p><img src="/images/4.10.png" width="500" class="center" /></p>
+
+<p><img src="/images/4.11.png" alt="image alt text" class="center" /></p>
+
+<p>So here’s a broad-stroke description:</p>
+
+<p><strong>For every <em style="color: red">frequency</em> we make a <em style="color: magenta">complex sinusoid</em> of <em style="color: brown">the given frequency</em> and multiply that with <em style="color: purple">our signal</em>, the <em style="color: green">sum of all the samples of the resulting multiplication</em> will indicate the amount of <em style="color: red">that frequency</em> present in the signal.</strong></p>
+
+<p>You may be asking yourself…</p>
+
+<h3 id="why-are-we-multiplying-our-input-signal-by-sinusoids">Why are we multiplying our input signal by sinusoids?</h3>
+
+<p>The complex sinusoid is different for each bin. It’s frequency is set by k. This complex sinusoid hunts for a sinusoid that matches it in our input signal and, if it finds something, will give us back some numbers that we can then use to  find the amplitude and phase of of that frequency.</p>
+
+<p>Imagine we have a sinusoid A, which is at <a href="https://en.wikipedia.org/wiki/Nyquist_frequency">Nyquist</a> frequency, 7 samples long:</p>
+
+<p><img src="/images/4.sheet1.jpeg" alt="image alt text" class="center" /></p>
+
+<p>If we summed all of these samples we’d get -1. The 1s mostly cancel out the -1s along the way, and if this was an even longer signal they’d continue to do so, no matter how many samples long this sinusoid was, the sum of all it’s samples would never equal anything greater than 1 or less than -1.</p>
+
+<p>Say we do a point-wise multiplication this by a sinusoid of a another sinusoid of a different frequency, for example ½ Nyquist frequency:</p>
+
+<p><img src="/images/4.sheet4.jpeg" alt="image alt text" class="center" /></p>
+
+<p>The sum of AB is now 0. The positives cancel out the negatives even after the multiplication.</p>
+
+<p>However, what if we multiply A by a sinusoid with the same frequency?</p>
+
+<p><img src="/images/4.sheet3.jpeg" alt="image alt text" class="center" /></p>
+
+<p>Now the sum of AB = 7 because a negative times a negative is a positive. This <em>in phase</em> quality of A and B yields a larger number. The size of this number really tells us the amount of B in A, times the number of samples in total. If A and B were perfectly out of phase we’d get a -7, telling us that A is the exact opposite of B.</p>
+
+<p>However, if it’s not in phase or exactly out of phase then we are not going to get such a clear indication of its presence. That’s why we need both components of the complex sinusoid.  Let’s see this by working through some examples:</p>
+
+<h3 id="examples">Examples</h3>
+
+<p>We’ll start with a signal to test. Here’s a signal made from two sinusoids. We’ll use the just the real part of the DFT to find out which sinusoids.</p>
+
+<p><img src="/images/4.12.png" alt="image alt text" class="center" /></p>
+
+<p>We’ll call this input signal x.</p>
+
+<p>It’s 10 samples long (0 to 9). The DFT always uses the same number of bins as the length of the input signal. So our output spectrum will show 10 frequencies. So we’re going to make 10 sinusoids and multiply our input signal above with them:</p>
+
+<p>So k goes from 0 to 9. Our real sinusoids are as follows. Notice 2 things: Firstly, these cosines are not very smooth because of the low sample-rate. That’s OK though. Secondly, once we get past a frequency of <script type="math/tex">2 \pi \times 5</script> the frequencies look like they are going back down. Once we pass Nyquist we enter into <em><a href="https://en.wikipedia.org/wiki/Negative_frequency">negative frequenciess</a></em>. These are just discarded if we are analyzing the real signal (ie. any sound signal) since they will give results symmetrical to the positive frequencies. With this first example we’ll only look at the real component of our complex sinusoids.</p>
+
+<p><img src="/images/test.png" alt="image alt text" class="center" /></p>
+
+<p>You can see the results are all zero apart from at frequencies 2 and 3 (and their respective negative frequencies 7 and 8). These are indeed the frequencies that x was made from. Here they both happened to be at 0 phase, so we can catch it all with just the real sinusoids.</p>
+
+<p>But what happens if they don’t start at the right time? We’ll try another example and use both the real and imaginary components of our complex sinusoids.</p>
+
+<p>We looked at calculating phase and magnitude before when we were talking about points in the complex plane. This is what we’ll do with our real and imaginary components.</p>
+
+<p><strong>What we need to do here is imagine the sums of our multiplications of the signal with our real and imaginary sinusoids as Cartesian coordinates, and we want to work out their polar coordinates - their magnitude and phase.</strong></p>
+
+<p>Here’s a new example: it is also 10 samples long, but we’ll only bother with the frequencies up to Nyquist because of the symmetry explained above.</p>
+
+<p><img src="/images/4.13.png" alt="image alt text" class="center" /></p>
+
+<p><img src="/images/4.sheet5.jpeg" alt="image alt text" class="center" /></p>
+
+<p>As we can see, the two sinusoids were matching the bin frequencies 1 and 4. At 1 it was in phase, at 4 it was one radian out of phase.</p>
+
+<p>This is what the DFT does. It gives us a set of coordinates for each frequency, and from those we can work out the magnitude and phase. If you graphed the magnitude section, you’d get what you might recognise as a static frequency spectrum of that sound.</p>
+
+<h2 id="some-properties-of-the-dft">Some Properties of the DFT</h2>
+
+<p><strong>The bigger the DFT, the more frequency detail</strong></p>
+
+<p>Since the number of frequency bins depends on the number of samples that are input, we can say that the longer the sample size, the more detail frequency we can get in our output spectrum.</p>
+
+<p><strong>The magnitude spectrum is symmetrical around the y-axis for any real signal</strong></p>
+
+<p>As we’ve seen, the DFT gives us magnitude and phase values for a set of frequencies. These frequencies are determined by the length of the input signal. However, in practice we are only using the first half of them because the second half become the negative frequencies and are symmetrical.</p>
+
+<p><strong>If a sinusoid in a signal doesn’t exactly match a bin frequency, a peak will form at its closest bin frequency</strong></p>
+
+<p>We only saw what happens if the input signal is made of sinusoids that perfectly match one of the bin frequencies - what happens if there are sinusoids present that are not exactly one of those frequencies? Well, our input signal is inherently band-limited because it is discrete. So there simply can’t exist any frequencies which are above Nyquist or below the frequency of a sinusoid that completes one oscillation across the entire length of N. Nonetheless we could have a frequency that is in between two of our bin frequencies (in fact, out in the wild most frequencies will be like that). In this case the DFT will give you a peak at the closest bin frequency and the rest of the sinusoids energy will be distributed around a bunch of other bins at a generally low level.</p>
+
+<p><strong>The magnitude is scaled by the number of samples in the input signal</strong></p>
+
+<p>Also, you may have noticed that the magnitude spectrum output is scaled by the number of samples in our input signal. To get the amplitude you’ll have to divide it by N.</p>
+
+<h2 id="where-next">Where next?</h2>
+
+<p>As pointed out at the top of the page, we barely scratched the surface here. I hope, however, it is enough to solidify some of the basic concepts and provide an “a-ha” or two. Some key topics we’ve missed here include the benefits of zero-padding, zero-phase windowing, windows, and many more. I strongly recommend <a href="https://ccrma.stanford.edu/~jos/mdft/">Julius Smith’s website</a> for a very in-depth read on all the main topics. It’s an awful lot more academic than the approach in this article.</p>
+
+<p>For a fun journey through the ideas surrounding imaginary numbers, this <a href="https://www.youtube.com/watch?v=T647CGsuOVU">youtube series</a> has great explanations and very watchable.</p>
+
+<p>BetterExplained has a <a href="https://betterexplained.com/articles/intuitive-understanding-of-eulers-formula/">good article</a> on Euler’s formula. It’s very clear and jargon-free.</p>
+
+<p>As ever, if you read this all then thanks for humoring me and please let me know of any corrections or suggestions you have. I’m not formally trained in any of this stuff, I just learn it for fun and I hope that comes through.</p>
