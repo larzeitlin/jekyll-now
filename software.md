@@ -4,8 +4,6 @@ title: Software
 permalink: /software/
 ---
 
-Wait wot! All this stuff for free? If you are feeling all warm and fuzzy then make my day by heading over to this [very quiet peatron page](https://www.patreon.com/lukezeitlin) and showing some love.
-
 ## Mind The Gap
 
 This is a repitch delay plugin with a bunch of features including a 2 mode filter, Ping-Pong setting, tempo and ms delay settings. It's a 64bit Audio Unit.
